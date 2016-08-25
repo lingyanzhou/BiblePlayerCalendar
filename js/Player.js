@@ -108,6 +108,66 @@ CalendarUtils.isLeapYear = function (year) {
   return ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
 };
 
+CalendarUtils.buildCalendarView = function(viewSecId, collapseBtnIdFunc, collapseDivIdFunc, dayElementFunc) {
+  var dayOfWeekOfFirstDayInYear = CalendarUtils.getDayOfWeekOfFirstDayInYear();
+  var daysInMonths= CalendarUtils.getMonthlyDaysArray();
+  var dayOfYearOfFirstDayInMonth = 1;
+  for (var j=0; j<12; j++) {
+    var buttonEle = $(document.createElement('button'));
+    buttonEle.addClass("btn btn-block m-t-1");
+    buttonEle.attr("id", collapseBtnIdFunc(j)); 
+    buttonEle.attr("type","button");
+    buttonEle.attr("data-toggle","collapse");
+    buttonEle.attr("data-target","#"+collapseDivIdFunc(j));
+    buttonEle.text(CalendarUtils.numericToMonthCn(j));
+    $(viewSecId).append(buttonEle);
+    var tableWrapperEle = $(document.createElement('div'));
+    tableWrapperEle.addClass("table-responsive collapse");
+    tableWrapperEle.attr("id", collapseDivIdFunc(j));
+    $(viewSecId).append(tableWrapperEle);
+    var tableEle = $(document.createElement('table'));
+    tableWrapperEle.append(tableEle);
+    tableEle.addClass("table table-striped table-condensed text-center");
+
+    var theadEle = $(document.createElement('thead'));
+    theadEle.addClass("thead-default");
+    tableEle.append(theadEle);
+    var trEle = $(document.createElement('tr'));
+    theadEle.append(trEle);
+
+    for (var i=0; i<7; i++) {
+      var thEle = $(document.createElement('th'));
+      thEle.addClass("text-center");
+      thEle.text(CalendarUtils.numericToDayInWeekCn(i));
+      trEle.append(thEle);
+    }
+
+    var tbodyEle = $(document.createElement('tbody'));
+    tableEle.append(tbodyEle);
+
+    dayOfYearOfFirstDayInMonth += daysInMonths[j];
+    var dayOfYearOfLastDayInMonth = dayOfYearOfFirstDayInMonth+daysInMonths[j+1]-1;
+    trEle = $(document.createElement('tr'));
+    tbodyEle.append(trEle);
+    for (var i=0; i<(dayOfYearOfFirstDayInMonth+dayOfWeekOfFirstDayInYear-1)%7; i++) {
+      var tdEle = $(document.createElement('td'));
+      trEle.append(tdEle);
+    }
+
+    for (var i=dayOfYearOfFirstDayInMonth; i<=dayOfYearOfLastDayInMonth; i++) {
+      if ((i+dayOfWeekOfFirstDayInYear-1)%7==0) {
+        trEle = $(document.createElement('tr'));
+        tbodyEle.append(trEle);
+      }
+      var tdEle = $(document.createElement('td'));
+
+      var dayEle = dayElementFunc(j, i-dayOfYearOfFirstDayInMonth+1, i);
+      tdEle.append(dayEle);
+      trEle.append(tdEle);
+    }
+  }
+};
+
 
 /**
  *Utils namespace
@@ -239,78 +299,26 @@ var BiblePlayer = function() {
   });
 };
 
+BiblePlayer.prototype.getBuildCalendarDayElementFunc = function (nameFunc, linkFunc) {
+  var _this = this;
+  var _nameFunc = nameFunc;
+  var _linkFunc = linkFunc;
+  return function (month, daOfMonth, dayOfYear) {
+    var anchorEle = $(document.createElement('a'));
+    anchorEle.addClass("btn btn-success col-xs-12 col-sm-12 col-md-12 col-lg-12");
+    anchorEle.attr("href","javascript:void(0);");
+    anchorEle.attr("data-name", _nameFunc(month, daOfMonth));  
+    anchorEle.attr("data-url", _linkFunc(dayOfYear)); 
+    anchorEle.html(daOfMonth.toString()+"<span class=\"ui-icon ui-icon-circle-plus\"></span>");
+    anchorEle.click(function() {
+      _this.addToPlayList($(this).attr("data-name"), $(this).attr("data-url"));
+    });
+    return anchorEle;
+  };
+};
+
 BiblePlayer.prototype.buildCalendarView = function(btnSecId, collapseBtnIdFunc, collapseDivIdFunc, nameFunc, linkFunc) {
-  var dayOfWeekOfFirstDayInYear = CalendarUtils.getDayOfWeekOfFirstDayInYear();
-  var daysInMonths= CalendarUtils.getMonthlyDaysArray();
-  var dayOfYearOfFirstDayInMonth = 1;
-  for (var j=0; j<12; j++) {
-    var buttonEle = $(document.createElement('button'));
-    buttonEle.addClass("btn btn-block m-t-1");
-    buttonEle.attr("id", collapseBtnIdFunc(j)); //"player-playlist-jy-"+j.toString());
-    buttonEle.attr("type","button");
-    buttonEle.attr("data-toggle","collapse");
-    buttonEle.attr("data-target","#"+collapseDivIdFunc(j)); //player-playlist-jy-collapse-"+j.toString());
-    buttonEle.text(CalendarUtils.numericToMonthCn(j));
-    $(btnSecId).append(buttonEle);
-    var tableWrapperEle = $(document.createElement('div'));
-    tableWrapperEle.addClass("table-responsive collapse");
-    tableWrapperEle.attr("id", collapseDivIdFunc(j)); //"player-playlist-jy-collapse-"+j.toString());
-    $(btnSecId).append(tableWrapperEle);
-    var tableEle = $(document.createElement('table'));
-    tableWrapperEle.append(tableEle);
-    tableEle.addClass("table table-striped table-condensed text-center");
-    //var captionEle = $(document.createElement('caption'));
-    //captionEle.addClass("text-center");
-    //tableEle.append(captionEle);
-    //captionEle.text(CalendarUtils.numericToMonthCn(j));
-
-
-    var theadEle = $(document.createElement('thead'));
-    theadEle.addClass("thead-default");
-    tableEle.append(theadEle);
-    var trEle = $(document.createElement('tr'));
-    theadEle.append(trEle);
-
-    for (var i=0; i<7; i++) {
-      var thEle = $(document.createElement('th'));
-      thEle.addClass("text-center");
-      thEle.text(CalendarUtils.numericToDayInWeekCn(i));
-      trEle.append(thEle);
-    }
-
-    var tbodyEle = $(document.createElement('tbody'));
-    tableEle.append(tbodyEle);
-
-    dayOfYearOfFirstDayInMonth += daysInMonths[j];
-    var dayOfYearOfLastDayInMonth = dayOfYearOfFirstDayInMonth+daysInMonths[j+1]-1;
-    trEle = $(document.createElement('tr'));
-    tbodyEle.append(trEle);
-    for (var i=0; i<(dayOfYearOfFirstDayInMonth+dayOfWeekOfFirstDayInYear-1)%7; i++) {
-      var tdEle = $(document.createElement('td'));
-      trEle.append(tdEle);
-    }
-
-    for (var i=dayOfYearOfFirstDayInMonth; i<=dayOfYearOfLastDayInMonth; i++) {
-      if ((i+dayOfWeekOfFirstDayInYear-1)%7==0) {
-        trEle = $(document.createElement('tr'));
-        tbodyEle.append(trEle);
-      }
-      var tdEle = $(document.createElement('td'));
-
-      var anchorEle = $(document.createElement('a'));
-      anchorEle.addClass("btn btn-success col-xs-12 col-sm-12 col-md-12 col-lg-12");
-      anchorEle.attr("href","javascript:void(0);");
-      anchorEle.attr("data-name", nameFunc(j, (i-dayOfYearOfFirstDayInMonth+1)));  
-      anchorEle.attr("data-url", linkFunc(i)); 
-      anchorEle.html((i-dayOfYearOfFirstDayInMonth+1).toString()+"<span class=\"ui-icon ui-icon-circle-plus\"></span>");
-      var _this = this;
-      anchorEle.click(function() {
-        _this.addToPlayList($(this).attr("data-name"), $(this).attr("data-url"));
-      });
-      tdEle.append(anchorEle);
-      trEle.append(tdEle);
-    }
-  }
+  CalendarUtils.buildCalendarView(btnSecId, collapseBtnIdFunc, collapseDivIdFunc, this.getBuildCalendarDayElementFunc(nameFunc, linkFunc))
 };
 
 BiblePlayer.prototype.start = function() {
