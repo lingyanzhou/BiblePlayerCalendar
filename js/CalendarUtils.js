@@ -155,13 +155,14 @@ CalendarUtils.buildCalendarView = function(viewSecId, collapseBtnIdFunc, collaps
     }
 
     for (var i=dayOfYearOfFirstDayInMonth; i<=dayOfYearOfLastDayInMonth; i++) {
-      if ((i+dayOfWeekOfFirstDayInYear-1)%7==0) {
+      var dayOfWeek = (i+dayOfWeekOfFirstDayInYear-1)%7;
+      if (dayOfWeek==0) {
         trEle = $(document.createElement('tr'));
         tbodyEle.append(trEle);
       }
       var tdEle = $(document.createElement('td'));
 
-      var dayEle = dayElementFunc(j, i-dayOfYearOfFirstDayInMonth+1, i);
+      var dayEle = dayElementFunc(j, i-dayOfYearOfFirstDayInMonth+1, i, dayOfWeek);
       tdEle.append(dayEle);
       trEle.append(tdEle);
     }

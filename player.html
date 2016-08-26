@@ -13,8 +13,8 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 
     <!--Jquery -->
-    <script src="https://code.jquery.com/jquery-3.1.0.slim.min.js"
-            integrity="sha256-cRpWjoSOw5KcyIOaZNo4i6fZ9tKPhYYb6i5T9RSVJG8="
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"
+            integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="
             crossorigin="anonymous"></script>
 
     <!--Jquery UI-->
@@ -25,9 +25,11 @@
     <!--Bootstrap-->
     <script src = "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
     
+    <script src="js/StringUtils.js" type="text/javascript"></script>
     <script src="js/CalendarUtils.js" type="text/javascript"></script>
     <script src="js/AudioLinkUtils.js" type="text/javascript"></script>
     <script src="js/Player.js" type="text/javascript"></script>
+    <script src="js/PopoverInit.js" type="text/javascript"></script>
 
     <title>圣经一年一遍播放器</title>
   </head>
@@ -109,6 +111,28 @@
                    id="bibleplayer-audioPlayerLoop" >
             <span class="hidden-xs">循环播放</span><span class="ui-icon ui-icon-refresh"></span>
           </a>
+          <!-- Trigger the modal with a button -->
+          <a href="javascript:void(0);" class="btn btn-info" title="循环播放" data-toggle="modal" 
+            data-target="#bibleplayer-textModal"><span class="hidden-xs">显示文本</span>
+            <span class="ui-icon ui-icon-script"></span></a>
+        
+        </div>
+        <div class="modal fade" id="bibleplayer-textModal" role="dialog">
+          <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span class="ui-icon ui-icon-close"></span></button>
+                <h4 class="modal-title"><span class="bibleplayer-nowPlayingNameCls"></span></h4>
+              </div>
+              <div class="modal-body">
+                <div id="bibleplayer-textcontent"></div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close<span class="ui-icon ui-icon-close"></span></button>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="vertical-5" >
         </div>
@@ -171,6 +195,6 @@
       </div>
     </div>
     <hr />
-    <p>Author: Lingyan Zhou - 2016</p>
+    <p>音频来源:灵培书房 2015.12.21</p>
   </body>
 </html>

@@ -2,10 +2,12 @@
  *PlayerListEntry Object
  *
  */
-var PlayListEntry = function(name, url) {
+var PlayListEntry = function(name, url, textUrl) {
   this.name = name;
   this.url = url;
+  this.textUrl = textUrl;
 };
+
 
 /**
  * BiblePlayer object
@@ -26,6 +28,7 @@ var BiblePlayer = function() {
   this.nowPlayingNameCls = ".bibleplayer-nowPlayingNameCls";
   this.audioPlayerLoopId = "#bibleplayer-audioPlayerLoop";
   this.topControlsSecId = "#bibleplayer-topControlsSec";
+  this.textSecId = "#bibleplayer-textcontent";
   this.maxNewTestament = 364;
   this.maxOldTestament = 364;
 
@@ -35,31 +38,32 @@ var BiblePlayer = function() {
   this.loopCtl = true;
   this.isPlaying = false;
   this.nowPlaying = null;
+  this.nowText = "";
 
   //For callback closure
   var _this = this;
 
 
-  this.addToPlayList(AudioLinkUtils.getNameFunc(true)(CalendarUtils.getTodayMonth(), CalendarUtils.getTodayDayOfMonth()), 
-      AudioLinkUtils.getLinkFunc(this.maxOldTestament, true)(CalendarUtils.getTodayDayOfYear()));
-  this.addToPlayList(AudioLinkUtils.getNameFunc(false)(CalendarUtils.getTodayMonth(), CalendarUtils.getTodayDayOfMonth()), 
-      AudioLinkUtils.getLinkFunc(this.maxNewTestament, false)(CalendarUtils.getTodayDayOfYear()));
-  //this.addToPlayList("旧"+CalendarUtils.getTodayMonth().toString()+"-"+CalendarUtils.getTodayDayOfMonth().toString(), 
-  //    "jy1n1b/"+AudioLinkUtils.padZero(CalendarUtils.getTodayDayOfYear())+".mp3");
-  //this.addToPlayList("新"+CalendarUtils.getTodayMonth().toString()+"-"+CalendarUtils.getTodayDayOfMonth().toString(), 
-  //    "xy1n1b/"+AudioLinkUtils.padZero(CalendarUtils.getTodayDayOfYear())+".mp3");
+  this.addToPlayList(this.getPlayListEntryNameFunc(true)(CalendarUtils.getTodayMonth(), CalendarUtils.getTodayDayOfMonth()), 
+      AudioLinkUtils.getLinkFunc(this.maxOldTestament, true)(CalendarUtils.getTodayDayOfYear()),
+      AudioLinkUtils.getTextLinkFunc(this.maxOldTestament, true)(CalendarUtils.getTodayDayOfYear()));
+  this.addToPlayList(this.getPlayListEntryNameFunc(false)(CalendarUtils.getTodayMonth(), CalendarUtils.getTodayDayOfMonth()), 
+      AudioLinkUtils.getLinkFunc(this.maxNewTestament, false)(CalendarUtils.getTodayDayOfYear()),
+      AudioLinkUtils.getTextLinkFunc(this.maxNewTestament, false)(CalendarUtils.getTodayDayOfYear()));
   
   this.buildCalendarView(this.jyBtnSecId,
-      AudioLinkUtils.getPrefixIdFunc("player-playlist-jy-"),
-      AudioLinkUtils.getPrefixIdFunc("player-playlist-jy-collapse-"),
-      AudioLinkUtils.getNameFunc(true),
-      AudioLinkUtils.getLinkFunc(this.maxOldTestament, true));
+      StringUtils.getPrefixStringFunc("player-playlist-jy-"),
+      StringUtils.getPrefixStringFunc("player-playlist-jy-collapse-"),
+      this.getPlayListEntryNameFunc(true),
+      AudioLinkUtils.getLinkFunc(this.maxOldTestament, true),
+      AudioLinkUtils.getTextLinkFunc(this.maxOldTestament, true));
 
   this.buildCalendarView(this.xyBtnSecId,
-      AudioLinkUtils.getPrefixIdFunc("player-playlist-xy-"),
-      AudioLinkUtils.getPrefixIdFunc("player-playlist-xy-collapse-"),
-      AudioLinkUtils.getNameFunc(false),
-      AudioLinkUtils.getLinkFunc(this.maxNewTestament, false));
+      StringUtils.getPrefixStringFunc("player-playlist-xy-"),
+      StringUtils.getPrefixStringFunc("player-playlist-xy-collapse-"),
+      this.getPlayListEntryNameFunc(false),
+      AudioLinkUtils.getLinkFunc(this.maxNewTestament, false),
+      AudioLinkUtils.getTextLinkFunc(this.maxNewTestament, false));
 
   this.changeAudio(undefined);
   this.updatePlayListUi();
@@ -87,26 +91,48 @@ var BiblePlayer = function() {
   });
 };
 
-BiblePlayer.prototype.getBuildCalendarDayElementFunc = function (nameFunc, linkFunc) {
+BiblePlayer.prototype.getPlayListEntryNameFunc = function (isOldTestament) {
+  if (isOldTestament) {
+    return function(month, dayOfMonth) {
+      return "旧"+(month+1).toString()+"-"+dayOfMonth.toString();
+    };
+  } else {
+    return function(month, dayOfMonth) {
+      return "新"+(month+1).toString()+"-"+dayOfMonth.toString();
+    };
+  }
+};
+
+BiblePlayer.prototype.getBuildCalendarDayElementFunc = function (nameFunc, linkFunc, textLinkFunc) {
   var _this = this;
   var _nameFunc = nameFunc;
   var _linkFunc = linkFunc;
-  return function (month, daOfMonth, dayOfYear) {
+  var _textLinkFunc = textLinkFunc;
+  return function (month, dayOfMonth, dayOfYear, dayOfWeek) {
     var anchorEle = $(document.createElement('a'));
-    anchorEle.addClass("btn btn-success col-xs-12 col-sm-12 col-md-12 col-lg-12");
+    anchorEle.addClass("btn btn-sm col-xs-12 col-sm-12 col-md-12 col-lg-12");
+    if (0==dayOfWeek || 6==dayOfWeek) {
+       anchorEle.addClass("btn-weekend");
+    } else {
+       anchorEle.addClass("btn-weekday");
+    }
     anchorEle.attr("href","javascript:void(0);");
-    anchorEle.attr("data-name", _nameFunc(month, daOfMonth));  
+    anchorEle.attr("data-name", _nameFunc(month, dayOfMonth));  
     anchorEle.attr("data-url", _linkFunc(dayOfYear)); 
-    anchorEle.html(daOfMonth.toString()+"<span class=\"ui-icon ui-icon-circle-plus\"></span>");
+    anchorEle.attr("data-texturl", _textLinkFunc(dayOfYear));
+    anchorEle.html(dayOfMonth.toString()+"<br /> <span class=\"ui-icon ui-icon-circle-plus\"></span>");
     anchorEle.click(function() {
-      _this.addToPlayList($(this).attr("data-name"), $(this).attr("data-url"));
+      _this.addToPlayList($(this).attr("data-name"), $(this).attr("data-url"), $(this).attr("data-texturl"));
     });
     return anchorEle;
   };
 };
 
-BiblePlayer.prototype.buildCalendarView = function(btnSecId, collapseBtnIdFunc, collapseDivIdFunc, nameFunc, linkFunc) {
-  CalendarUtils.buildCalendarView(btnSecId, collapseBtnIdFunc, collapseDivIdFunc, this.getBuildCalendarDayElementFunc(nameFunc, linkFunc))
+BiblePlayer.prototype.buildCalendarView = function(btnSecId, 
+    collapseBtnIdFunc, collapseDivIdFunc, 
+    nameFunc, linkFunc, textLinkFunc) {
+  CalendarUtils.buildCalendarView(btnSecId, collapseBtnIdFunc, collapseDivIdFunc, 
+      this.getBuildCalendarDayElementFunc(nameFunc, linkFunc, textLinkFunc));
 };
 
 BiblePlayer.prototype.start = function() {
@@ -144,9 +170,17 @@ BiblePlayer.prototype.updateControlsUi = function() {
     $(this.audioPlayerLoopId).removeClass("active");
   }
   if (null===this.nowPlaying) {
-    $(this.nowPlayingNameCls).text("空");
+    $(this.nowPlayingNameCls).text("无内容");
   } else {
     $(this.nowPlayingNameCls).text(this.nowPlaying.name);
+  }
+};
+
+BiblePlayer.prototype.updateTextContent = function() {
+  if (""===this.nowText) {
+    $(this.textSecId).text("无内容");
+  } else {
+    $(this.textSecId).html(this.nowText);
   }
 };
 
@@ -155,6 +189,7 @@ BiblePlayer.prototype.next = function() {
     this.changeAudio(undefined);
     this.isPlaying=false;
     this.nowPlaying = null;
+    this.nowText="";
     alert("播放列表为空。请添加播放片段。");
   } else {
     this.isPlaying=true;
@@ -163,12 +198,22 @@ BiblePlayer.prototype.next = function() {
     if (this.loopCtl) {
       this.toPlayList.push(nextAudio);
     }
+    
     this.changeAudio(nextAudio.url);
+    this.changeText(nextAudio.textUrl);
     this.updatePlayListUi();
   }
   this.updateControlsUi();
 };
 
+BiblePlayer.prototype.changeText = function(textUrl) {
+  var _this = this;
+  this.nowText="";
+  $.get( textUrl, function( data ) {
+      _this.nowText = data;
+      _this.updateTextContent();
+  });
+};
 
 /* function changeAudio
    original author: Justice Erolin
@@ -192,8 +237,8 @@ BiblePlayer.prototype.changeAudio = function (sourceUrl) {
   }
 };
 
-BiblePlayer.prototype.addToPlayList = function (name, url) {
-  var entry = new PlayListEntry(name, url);
+BiblePlayer.prototype.addToPlayList = function (name, url, texturl) {
+  var entry = new PlayListEntry(name, url, texturl);
   this.toPlayList.push(entry);
   this.updatePlayListUi();
 };
@@ -207,7 +252,7 @@ BiblePlayer.prototype.updatePlayListUi = function () {
     $(this.playListSecId).append(liEle);
     var anchorEle = $(document.createElement('a'));
     liEle.append(anchorEle);
-    anchorEle.addClass("btn btn-warning");
+    anchorEle.addClass("btn btn-warning btn-sm");
     anchorEle.attr("href", "javascript:void(0);");
     anchorEle.prop("data-index", i.toString());
     anchorEle.click(function() {
@@ -226,20 +271,24 @@ BiblePlayer.prototype.getAddFuturePlayListEntriesFunc = function (futureDays) {
   var _this = this;
   return function() {
     var today = new Date();
-    var oldTestamentNameFunc = AudioLinkUtils.getNameFunc(true);
-    var oldTestamentLinkFunc = AudioLinkUtils.getLinkFunc(_this.maxOldTestament, true);
-    var newTestamentNameFunc = AudioLinkUtils.getNameFunc(false);
-    var newTestamentLinkFunc = AudioLinkUtils.getLinkFunc(_this.maxNewTestament, false);
+    var oldTestamentNameFunc = _this.getPlayListEntryNameFunc(true);
+    var oldTestamentLinkFunc = AudioLinkUtils.getLinkFunc(_this.maxOldTestament, true)
+    var oldTestamentTextLinkFunc = AudioLinkUtils.getTextLinkFunc(_this.maxOldTestament, true);
+    var newTestamentNameFunc = _this.getPlayListEntryNameFunc(false);
+    var newTestamentLinkFunc = AudioLinkUtils.getLinkFunc(_this.maxNewTestament, false)
+    var newTestamentTextLinkFunc = AudioLinkUtils.getTextLinkFunc(_this.maxNewTestament, false);
     for (var i=0; i<=futureDays; i++) {
       var futureDay = CalendarUtils.addDays(today, i);
       var entry = new PlayListEntry(oldTestamentNameFunc(futureDay.getMonth(), futureDay.getDate()),
-          oldTestamentLinkFunc(CalendarUtils.getDayOfYear(futureDay)));
+          oldTestamentLinkFunc(CalendarUtils.getDayOfYear(futureDay)),
+          oldTestamentTextLinkFunc(CalendarUtils.getDayOfYear(futureDay)));
       _this.toPlayList.push(entry);
     }
     for (var i=0; i<=futureDays; i++) {
       var futureDay = CalendarUtils.addDays(today, i);
       var entry = new PlayListEntry(newTestamentNameFunc(futureDay.getMonth(), futureDay.getDate()),
-          newTestamentLinkFunc(CalendarUtils.getDayOfYear(futureDay)));
+          newTestamentLinkFunc(CalendarUtils.getDayOfYear(futureDay)),
+          newTestamentTextLinkFunc(CalendarUtils.getDayOfYear(futureDay)));
       _this.toPlayList.push(entry);
     }
     _this.updatePlayListUi();

@@ -9,24 +9,6 @@ AudioLinkUtils.padZero = function (num) {
     return s.substr(s.length-4);
 };
 
-AudioLinkUtils.getPrefixIdFunc = function (prefix) {
-    return function(month) {
-        return prefix+month.toString()
-    };
-};
-
-AudioLinkUtils.getNameFunc = function (isOldTestament) {
-  if (isOldTestament) {
-    return function(month, dayOfMonth) {
-      return "旧"+(month+1).toString()+"-"+dayOfMonth.toString();
-    };
-  } else {
-    return function(month, dayOfMonth) {
-      return "新"+(month+1).toString()+"-"+dayOfMonth.toString();
-    };
-  }
-};
-
 AudioLinkUtils.getLinkFunc = function (maxLink, isOldTestament) {
   var _maxLink = maxLink;
   if (isOldTestament) {
@@ -40,3 +22,16 @@ AudioLinkUtils.getLinkFunc = function (maxLink, isOldTestament) {
   }
 };
 
+
+AudioLinkUtils.getTextLinkFunc = function (maxLink, isOldTestament) {
+  var _maxLink = maxLink;
+  if (isOldTestament) {
+    return function(dayOfYear) {
+      return "biblecontent/jy1n1b"+Math.min(dayOfYear, _maxLink)+".html";
+    };
+  } else {
+    return function(dayOfYear) {
+      return "biblecontent/xy1n1b"+Math.min(dayOfYear, _maxLink)+".html";
+    };
+  }
+};
