@@ -8,6 +8,10 @@ Feature:
 * Carefree. Looping and playlist enables you to listen while driving.
 * You can view text of the audio.
 
+[Sample site](http://bibleplayer-lingyanzhou.rhcloud.com/) (Disclaimer: Bible texts and audios are from www.inchrist.cn.)
+
+
+
 Audio files
 ----------
 
@@ -82,5 +86,4 @@ Screenshots
 
 
 ![screenshot-sm-month-expanded](https://cloud.githubusercontent.com/assets/13041926/18015515/e1a41cc4-6b7c-11e6-9767-a482779910e9.png)
-
 
