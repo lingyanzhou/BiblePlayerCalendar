@@ -32,3 +32,37 @@ body {
   margin-top:1rem;
 }
 
+.btn-weekday {
+  color: #00b;
+  background-color: #7d7;
+  border-color: #6c6;
+}
+.btn-weekday:focus,
+.btn-weekday.focus {
+  color: #fff;
+  background-color: #6b6;
+  border-color: #474;
+}
+.btn-weekday:hover {
+  background-color: #6b6;
+  border-color: #5a5;
+}
+
+
+.btn-weekend {
+  font-weight:bold !important;
+  color: #b00;
+  background-color: #fff;
+  border-color: #d66 !important;
+}
+.btn-weekend:focus,
+.btn-weekend.focus {
+  color: #d22;
+  background-color: #ddd;
+  border-color: #b44;
+}
+.btn-weekend:hover {
+  color: #f44;
+  background-color: #fdd;
+  border-color: #d66;
+}
