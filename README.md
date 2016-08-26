@@ -3,10 +3,10 @@ Intro
 -------------
 Bootstrap, JQuery powered bible audio player with an annual calendar schedule.
 Feature:
-    * The calendar view helps you keep up with your schedule.
-    * Convenient. Audios can be add, delete from the playlist. 
-    * Carefree. Looping and playlist enables you to listen while driving.
-    * You can view text of the audio.
+* The calendar view helps you keep up with your schedule.
+* Convenient. Audios can be add, delete from the playlist. 
+* Carefree. Looping and playlist enables you to listen while driving.
+* You can view text of the audio.
 
 Audio files
 ----------
