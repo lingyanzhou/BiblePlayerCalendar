@@ -63,6 +63,13 @@ and like (for new testament):
   ...
   xy1n1b364.html
 ```
+
+Deployment
+--------
+
+Deploy on any static http server: Simple move all content in www folder into your server's public html folder.
+
+
 Screenshots
 -----------
 * On large screens:
